@@ -71,26 +71,30 @@ USDAClean[USDAClean$Sodium == max(USDAClean$Sodium),]
 # hist(USDAClean[USDAClean$VitaminC < 100.1, 'VitaminC'], breaks=seq(-0.1,100.1,by=0.1), xlim=c(0,100), freq=T)
 hist(USDAClean$VitaminC, breaks=100, xlim=c(0,100))
 ```
-```
 
 ### 9. Create a boxplot to illustrate the distribution of values for TotalFat, Protein and Carbohydrate. (6 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+boxplot(USDAClean[,c('TotalFat','Protein','Carbohydrate')])
 ```
 
 ### 10. Create a scatterplot to illustrate the relationship between a food's TotalFat content and its calorie content. (6 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+plot(USDAClean$Calories, USDAClean$TotalFat)
 ```
 
 ### 11. Add a variable to the data frame that takes value 1 if the food has higher sodium than average, 0 otherwise.Call this variable HighSodium. Do the same for High Calories, High Protein, High Sugar, and High Fat. How many foods have both high sodium and high fat? (8 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+USDAClean$HighSodium <- as.numeric(USDAClean[,'Sodium'] > mean(USDAClean$Sodium))
+USDAClean$HighCalories <- as.numeric(USDAClean[,'Calories'] > mean(USDAClean$Calories))
+USDAClean$HighProtein <- as.numeric(USDAClean[,'Protein'] > mean(USDAClean$Protein))
+USDAClean$HighSugar <- as.numeric(USDAClean[,'Sugar'] > mean(USDAClean$Sugar))
+USDAClean$HighFat <- as.numeric(USDAClean[,'TotalFat'] > mean(USDAClean$TotalFat))
 ```
 
 ### 12. Calculate the average amount of iron, sorted by high and low protein. (8 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+#0: Low Protein, 1: High Protein
+sapply(split(USDAClean$Iron, USDAClean$HighProtein), mean)
 ```
 
 ### 13. Create a script for a "HealthCheck" program to detect unhealthy foods. Use the algorithm flowchart below as a basis for this script. (8 points)
@@ -101,7 +105,47 @@ plot(1:4, ty = 'n', ann = F, xaxt = 'n', yaxt = 'n')
 rasterImage(img,1,1,4,4)
 ```
 ```{r}
-# INSERT YOUR ANSWER HERE
+
+# health.check <- function(sodium, sugar, fat, threshold=2, data=USDAClean){
+#   maxSugar <- mean(data$Sugar) + threshold*sd(data$Sugar)
+#   maxSodium <- mean(data$Sodium) + threshold*sd(data$Sodium)
+#   maxFat <- mean(data$TotalFat) + threshold*sd(data$TotalFat)
+#   
+#   print(maxSodium)
+#   print(maxSugar)
+#   print(maxFat)
+#   
+#   if(sodium > maxSodium && sugar > maxSugar && fat > maxFat){ return(TRUE) }
+#   #else if(sugar > maxSugar) { return false; }
+#   #else if(cond3) {...}
+#   else{ return(FALSE) }
+# 
+# }
+# As we already inserted the HighSodium columns you can subset the dataframe without abstracting the process into it's own function:
+# bad.foods <- USDAClean[USDAClean$HighSodium & USDAClean$HighSugar & USDAClean$HighFat,]
+# 
+# However, as it seems you want an if/else ladder (in a function?):
+# This function will return a false (health check fails) for foods with higher than average sodium, sugar and fat. Otherwise returns a false (health check pass)
+
+health.check <- function(obs, data=USDAClean){
+  # print(class(obs))
+  # print(obs)
+  # print(obs['Sodium'])
+  # print(mean(data$Sodium))
+  # # 
+  # print(data$Sodium > mean(data$Sodium))
+  # 
+  #if(data[id,'Sodium'] > mean(data$Sodium) && data[id, 'Sugar'] > mean(data$Sugar) && data[id, 'TotalFat'] > mean(data$TotalFat)) return(FALSE)
+  meanSodium <- mean(data$Sodium)
+  meanSugar <- mean(data$Sugar)
+  meanFat <- mean(data$TotalFat)
+  # if(obs['Sodium'] > mean(data$Sodium) && obs['Sugar'] > mean(data$Sugar) && obs['TotalFat'] > mean(data$TotalFat)) return(FALSE)
+  if(obs['Sodium'] > meanSodium & obs['Sugar'] > meanSugar & obs['TotalFat'] > meanFat) return(FALSE)
+  else return(TRUE)
+}
+
+#Total which fail test: Total - Pass
+(nrow(USDAClean) - sum(apply(USDAClean,1, health.check)))
 ```
 
 ### 14. Add a new variable called HealthCheck to the data frame using the output of the function. (8 points)
