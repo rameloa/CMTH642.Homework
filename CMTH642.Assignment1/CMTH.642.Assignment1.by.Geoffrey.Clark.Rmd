@@ -84,11 +84,16 @@ plot(USDAClean$Calories, USDAClean$TotalFat)
 
 ### 11. Add a variable to the data frame that takes value 1 if the food has higher sodium than average, 0 otherwise.Call this variable HighSodium. Do the same for High Calories, High Protein, High Sugar, and High Fat. How many foods have both high sodium and high fat? (8 points)
 ```{r}
-USDAClean$HighSodium <- as.numeric(USDAClean[,'Sodium'] > mean(USDAClean$Sodium))
-USDAClean$HighCalories <- as.numeric(USDAClean[,'Calories'] > mean(USDAClean$Calories))
-USDAClean$HighProtein <- as.numeric(USDAClean[,'Protein'] > mean(USDAClean$Protein))
-USDAClean$HighSugar <- as.numeric(USDAClean[,'Sugar'] > mean(USDAClean$Sugar))
-USDAClean$HighFat <- as.numeric(USDAClean[,'TotalFat'] > mean(USDAClean$TotalFat))
+# USDAClean$HighSodium <- as.numeric(USDAClean[,'Sodium'] > mean(USDAClean$Sodium))
+# USDAClean$HighCalories <- as.numeric(USDAClean[,'Calories'] > mean(USDAClean$Calories))
+# USDAClean$HighProtein <- as.numeric(USDAClean[,'Protein'] > mean(USDAClean$Protein))
+# USDAClean$HighSugar <- as.numeric(USDAClean[,'Sugar'] > mean(USDAClean$Sugar))
+# USDAClean$HighFat <- as.numeric(USDAClean[,'TotalFat'] > mean(USDAClean$TotalFat))
+
+for(att in c('Sodium', 'Calories','Protein','Sugar','TotalFat')){
+  high.att <- paste('High',att,sep='')
+  USDAClean[,high.att] <- as.numeric(USDAClean[,att] > mean(USDAClean[,att]))
+}
 ```
 
 ### 12. Calculate the average amount of iron, sorted by high and low protein. (8 points)
@@ -140,12 +145,16 @@ health.check <- function(obs, data=USDAClean){
   meanSugar <- mean(data$Sugar)
   meanFat <- mean(data$TotalFat)
   # if(obs['Sodium'] > mean(data$Sodium) && obs['Sugar'] > mean(data$Sugar) && obs['TotalFat'] > mean(data$TotalFat)) return(FALSE)
-  if(obs['Sodium'] > meanSodium & obs['Sugar'] > meanSugar & obs['TotalFat'] > meanFat) return(FALSE)
+  # if(obs['Sodium'] > meanSodium & obs['Sugar'] > meanSugar & obs['TotalFat'] > meanFat) return(FALSE)
+  if(as.numeric(obs['Sodium']) > meanSodium & as.numeric(obs['Sugar']) > meanSugar & as.numeric(obs['TotalFat']) > meanFat) return(FALSE)
   else return(TRUE)
 }
 
-#Total which fail test: Total - Pass
-(nrow(USDAClean) - sum(apply(USDAClean,1, health.check)))
+# Total which fail test: Total - Pass
+(nrow(USDAClean) - sum(apply(USDAClean,1, health.check))) #427
+
+# Same as:
+# nrow(USDAClean[USDAClean$HighSodium & USDAClean$HighSugar & USDAClean$HighFat,])
 ```
 
 ### 14. Add a new variable called HealthCheck to the data frame using the output of the function. (8 points)
