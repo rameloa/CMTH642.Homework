@@ -16,12 +16,16 @@ USDA <- merge(USDA_Micro, USDA_Macro, by="ID")
 
 ### 3. Check the datatypes of the attributes. Delete the commas in the Sodium and Potasium records. Assign Sodium and Potasium as numeric data types. (6 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+sapply(USDA, class)
+gsub(',','', USDA$Sodium)
+gsub(',','', USDA$Potassium)
+USDA$Sodium <- as.numeric(USDA$Sodium)
+USDA$Potassium <- as.numeric(USDA$Potassium)
 ```
 
 ### 4. Remove records (rows) with missing values in more than 4 attributes (columns). How many records remain in the data frame? (6 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+USDA <- USDA[apply(USDA, 1 ,function(x) sum(is.na(x)) <= 4 ), ] #6918 Records remain
 ```
 
 ### 5. For records with missing values for Sugar, Vitamin E and Vitamin D, replace missing values with mean value for the respective variable. (6 points)
