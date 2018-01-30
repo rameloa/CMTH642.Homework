@@ -1,0 +1,49 @@
+---
+title: "CMTH 642, Lab 1"
+output: pdf_document
+---
+
+1. Read the "train.csv" file from the following website.
+"https://raw.githubusercontent.com/agconti/kaggle-titanic/master/data/train.csv"
+```{r}
+train.df <- read.csv("https://raw.githubusercontent.com/agconti/kaggle-titanic/master/data/train.csv")
+```
+
+2. Have a look at the data set.
+
+3. Change the "Pclass" and "Survived" attributes to factors.
+```{r}
+train.df$Pclass <- as.factor(train.df$Pclass)
+train.df$Survived <- as.factor(train.df$Survived)
+```
+
+4. Check the missing values of the "Age" and "Name" attributes. 
+```{r}
+train.df$Age[is.na(train.df$Age)]
+train.df$Name[is.na(train.df$Name)]
+```
+
+5. For a title containing a missing value, assign the mean age value for each title not containing a missing value. 
+(Hint: grepl(" Mr.\\.", train.data$Name))
+```{r}
+train.df[which(is.na(train.df$Age) & grepl("(Miss.|Mrs.)", train.df$Name)), "Age"] <- mean(train.df[which(!is.na(train.df$Age) & grepl("(Miss.|Mrs.)", train.df$Name)), "Age"], na.rm=T) #Women
+
+train.df[which(is.na(train.df$Age) & grepl("(Master\\.|Mr\\.)", train.df$Name)), "Age"] <- mean(train.df[which(!is.na(train.df$Age) & grepl(" Mr.\\.", train.df$Name)), "Age"], na.rm=T) #Men
+
+train.df[which(is.na(train.df$Age) & grepl(" Rev\\.", train.df$Name)), "Age"] <- mean(train.df[which(!is.na(train.df$Age) & grepl(" Rev.\\.", train.df$Name)), "Age"], na.rm=T) #Rev
+
+train.df[which(is.na(train.df$Age) & grepl(" Dr\\.", train.df$Name)), "Age"] <- mean(train.df[which(!is.na(train.df$Age) & grepl(" Dr\\.", train.df$Name)), "Age"], na.rm=T) #Doctor
+```
+
+6. List the distribution of Port of Embarkation. Replace empty entries with NA for "Embarked" attribute.
+```{r}
+table(train.df$Embarked)
+train.df[nchar(as.character(train.df$Embarked)) < 1,"Embarked"] <- NA
+```
+
+7. Assign the two missing values to the most counted port, which is Southampton in this case.
+
+```{r}
+train.df[is.na(train.df$Embarked),"Embarked"] <- "S" 
+```
+

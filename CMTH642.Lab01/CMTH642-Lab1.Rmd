@@ -1,0 +1,22 @@
+---
+title: "CMTH 642, Lab 1"
+output: pdf_document
+---
+
+1. Read the "train.csv" file from the following website.
+"https://raw.githubusercontent.com/agconti/kaggle-titanic/master/data/train.csv"
+
+2. Have a look at the data set.
+
+3. Change the "Pclass" and "Survived" attributes to factors.
+
+4. Check the missing values of the "Age" and "Name" attributes. 
+
+5. For a title containing a missing value, assign the mean age value for each title not containing a missing value. 
+(Hint: grepl(" Mr.\\.", train.data$Name))
+
+6. List the distribution of Port of Embarkation. Replace empty entries with NA for "Embarked" attribute.
+
+7. Assign the two missing values to the most counted port, which is Southampton in this case.
+
+
