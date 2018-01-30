@@ -30,22 +30,47 @@ USDA <- USDA[apply(USDA, 1 ,function(x) sum(is.na(x)) <= 4 ), ] #6918 Records re
 
 ### 5. For records with missing values for Sugar, Vitamin E and Vitamin D, replace missing values with mean value for the respective variable. (6 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+# The wording of this question, "Sugar, vitamin E and Vitamin D" implies the following:
+
+# USDA[is.na(USDA$Sugar) & is.na(USDA$VitaminE) & is.na(USDA$VitaminD), 'Sugar'] <- mean(USDA$Sugar, na.rm=T)
+# USDA[is.na(USDA$Sugar) & is.na(USDA$VitaminE) & is.na(USDA$VitaminD), 'VitaminD'] <- mean(USDA$VitaminD, na.rm=T)
+# USDA[is.na(USDA$Sugar) & is.na(USDA$VitaminE) & is.na(USDA$VitaminD), 'VitaminE'] <- mean(USDA$VitaminE, na.rm=T)
+
+# However, after discussing with Riyad, I have decided to do the following (which makes a bit more sense):
+
+# USDA[is.na(USDA$Sugar), 'Sugar'] <- mean(USDA$Sugar, na.rm=T)
+# USDA[is.na(USDA$VitaminE), 'VitaVitaminE'] <- mean(USDA$VitaVitaminE, na.rm=T)
+# USDA[is.na(USDA$VitaminD), 'VitaminD'] <- mean(USDA$VitaminD, na.rm=T)
+
+# If you want to do this on many attributes the following for loop works pretty slick:
+
+for(att in c('Sugar','VitaminE','VitaminD')){
+  USDA[is.na(USDA[,att]),att] <- mean(USDA[,att], na.rm=T)
+  # print(USDA[is.na(USDA[,att]),])
+  # print(mean(USDA[,att], na.rm=T))
+}
 ```
 
 ### 6. With a single line of code, remove all remaining records with missing values. Name the new Data Frame "USDAclean". How many records remain in the data frame? (6 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+USDAClean <- USDA[complete.cases(USDA),]
+
+# sum(is.na(USDA)) # 468
+# sum(is.na(USDAClean)) # 0
 ```
+
 
 ### 7. Which food has the highest sodium level? (6 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+USDAClean[USDAClean$Sodium == max(USDAClean$Sodium),]
+# Biscuit, Pln or Butmlk, Refri Dough, Higher fat
 ```
 
 ### 8. Create a histogram of Vitamin C distribution in foods, with a limit of 0 to 100 on the x-axis and breaks of 100. (6 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+# hist(USDAClean[USDAClean$VitaminC < 100.1, 'VitaminC'], breaks=seq(-0.1,100.1,by=0.1), xlim=c(0,100), freq=T)
+hist(USDAClean$VitaminC, breaks=100, xlim=c(0,100))
+```
 ```
 
 ### 9. Create a boxplot to illustrate the distribution of values for TotalFat, Protein and Carbohydrate. (6 points)
