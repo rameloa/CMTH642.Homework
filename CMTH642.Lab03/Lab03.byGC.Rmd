@@ -1,0 +1,126 @@
+---
+title: "CMTH642 Lab 03"
+author: "Geoffrey Clark"
+date: "January 30, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Preparation
+
+```{r}
+#isntall.packages("ISwR")
+library(ISwR)
+```
+
+We will first compare the means of the variable of interest across groups by side-by-side boxplots. plot(response ~ factor, data=data_name) where "response" is the name of the response variable and "factor" the variable  that separates the data into groups. Both variables should be contained in a data frame  called data_name.
+
+EXAMPLE:
+A drug company tested three formulations of a pain relief medicine for migraine  headache sufferers. For the experiment 27 volunteers were selected and 9 were randomly  assigned to one of three drug formulations. The subjects were instructed to take the drug  during their next migraine headache episode and to report their pain on a scale of  1 to 10 (10 being most pain).
+
+Drug A 4 5 4 3 2 4 3 4 4
+Drug B 6 8 4 5 4 6 5 8 6
+Drug C 6 7 6 6 7 5 6 5 5
+
+```{r}
+pain <- c(4, 5, 4, 3, 2, 4, 3, 4, 4, 6, 8, 4, 5, 4, 6, 5, 8, 6, 6, 7, 6, 6, 7, 5, 6, 5, 5) 
+drug <- c(rep("A",9), rep("B",9), rep("C",9)) 
+migraine <- data.frame(pain,drug)
+migraine
+plot(pain ~ drug, data=migraine)
+```
+
+
+From the boxplots it appears that the mean pain for drug A is lower than that for drugs B and C. Next, aov() can be used for fitting ANOVA models. The general form is  aov(response ~ factor, data=data_name) where "response" represents the response variable and "factor" the variable that separates the data into groups.  
+
+```{r}
+results <- aov(pain ~ drug, data=migraine)
+summary(results)
+```
+
+```{r}
+pairwise.t.test(pain, drug, p.adjust="bonferroni")
+```
+
+## Exercise 1
+
+We will use the anova() function to perform ANOVA test in R. This function accepts a  model object as input which corresponds a set of values based on a factor column  as our treatment variable. Generally, if the measurements and treatments are in a  dataframe called 'our_data' we will use lm function to create this model as:  fit_model = lm(measurements ~ treatments, data= our_data)  for two-way ANOVA this model would be based on both treatments and blocks:
+
+fit_model = lm(measurements ~ treatments + blocks, data= our_data)
+
+Below, there are three groups with seven observations per group:
+
+```{r}
+group1 <- c(18.2, 20.1, 17.6, 16.8, 18.8, 19.7, 19.1) 
+group2 <- c(17.4, 18.7, 19.1, 16.4, 15.9, 18.4, 17.7) 
+group3 <- c(15.2, 18.8, 17.7, 16.5, 15.9, 17.1, 16.7)
+```
+Perform the ANOVA test on the data by:
+1. Create a dataframe with two columns, 'observation' and 'group'. 
+```{r}
+df <- data.frame(observation=c(group1,group2,group3), group=(c(rep("group1",7), rep("group2",7), rep("group3", 7))))
+
+```
+
+2. Fit a linear model for observations based on groups.
+```{r}
+fm <- lm(observation ~ group, data=df)
+```
+
+3. Apply anova function on the fit model.
+```{r}
+#anova <- aov(observation ~ group, data=df)
+group.aov <- anova(fm)
+summary(anova)
+```
+
+## Exercise 2
+
+1. Load the ISwR library and look at the red.cell.folate data. Get help on this data  and read the description. This gives you more domain knowledge about the data. 
+```{r}
+# ??red.cell.folate brings up some package & dataset information
+```
+
+2. Investigate if different methods of ventilation during anesthesia has any effect 
+on the red folates. 
+
+```{r}
+#attach(red.cell.folate)
+summary(aov(folate ~ ventilation, data=red.cell.folate))
+```
+
+## Exercise 3
+
+1. Load juul dataset and have a look at the data and its descriptions.
+
+2. Investigate if Tanner levels have any significant effect on amount of insulin-like 
+growth factor igf1.
+
+```{r}
+# anova doesn't work too well if treatments aren't factors or if there's a bunch of NAs in there
+juul.df <- data.frame(igf1=juul$igf1, tanner=as.factor(juul$tanner))
+summary(anova(lm(igf1 ~ tanner, data=juul.df)))
+
+#below seems to get the expected result
+
+juul.df <- juul.df[!is.na(juul.df$igf1) & !is.na(juul.df$tanner),]
+summary(aov(igf1 ~ tanner, data=juul.df))
+```
+
+## Exercise 4
+
+The heart.rate data frame contains data for nine patients with congestive heart failure   before and shortly after administration of enalaprilat. Column hr is the patient heart  rate, column subject has the subject ids and column time indicates time between  administration of enalaprilat and measuring the heart rate. By performing a two-way ANOVA,  investigate if time (or subject) has any effect on the heart rates.  
+```{r}
+#attach(heart.rate)
+#hr.df <- heart.rate[!is.na(heart.rate$hr) & !is.na(heart.rate$subj) & !is.na(heart.rate$time),]
+hr.lm <- lm(hr ~ subj + time, data=heart.rate)
+#summary(anova(hr.lm))
+anova(hr.lm)
+#summary(aov(hr ~ subj + time, data=heart.rate))
+#aov(hr~subj+time, data=heart.rate)
+summary(aov(hr~subj+time, data=heart.rate))
+```
+
