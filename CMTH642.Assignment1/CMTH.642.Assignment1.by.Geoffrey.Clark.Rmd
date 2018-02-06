@@ -1,6 +1,8 @@
 ---
 title: 'CMTH 642 Data Analytics: Advanced Methods Assignment 1'
-output: pdf_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ### 1. Read the csv files in the folder. (4 points)
@@ -69,7 +71,7 @@ USDAClean[USDAClean$Sodium == max(USDAClean$Sodium),]
 ### 8. Create a histogram of Vitamin C distribution in foods, with a limit of 0 to 100 on the x-axis and breaks of 100. (6 points)
 ```{r}
 # hist(USDAClean[USDAClean$VitaminC < 100.1, 'VitaminC'], breaks=seq(-0.1,100.1,by=0.1), xlim=c(0,100), freq=T)
-hist(USDAClean$VitaminC, breaks=100, xlim=c(0,100))
+hist(USDAClean$VitaminC, breaks=100, xlim=c(0,100), main="Vitamin C Distribution in Foods", xlab="Vitamin C")
 ```
 
 ### 9. Create a boxplot to illustrate the distribution of values for TotalFat, Protein and Carbohydrate. (6 points)
@@ -94,6 +96,9 @@ for(att in c('Sodium', 'Calories','Protein','Sugar','TotalFat')){
   high.att <- paste('High',att,sep='')
   USDAClean[,high.att] <- as.numeric(USDAClean[,att] > mean(USDAClean[,att]))
 }
+
+# How many foods have both high sodium and high fat?
+nrow(USDAClean[USDAClean$HighSodium & USDAClean$HighTotalFat, ]) #1195
 ```
 
 ### 12. Calculate the average amount of iron, sorted by high and low protein. (8 points)
@@ -104,6 +109,7 @@ sapply(split(USDAClean$Iron, USDAClean$HighProtein), mean)
 
 ### 13. Create a script for a "HealthCheck" program to detect unhealthy foods. Use the algorithm flowchart below as a basis for this script. (8 points)
 ```{r}
+# install.packages(jpeg)
 require(jpeg)
 img<-readJPEG("HealthCheck.jpg")
 plot(1:4, ty = 'n', ann = F, xaxt = 'n', yaxt = 'n')
@@ -150,6 +156,16 @@ health.check <- function(obs, data=USDAClean){
   else return(TRUE)
 }
 
+
+```
+
+### 14. Add a new variable called HealthCheck to the data frame using the output of the function. (8 points)
+```{r}
+USDAClean$HealthCheck <- apply(USDAClean,1,health.check)
+```
+
+### 15. How many foods in the USDAclean data frame fail the HealthCheck? (8 points)
+```{r}
 # Total which fail test: Total - Pass
 (nrow(USDAClean) - sum(apply(USDAClean,1, health.check))) #427
 
@@ -157,19 +173,9 @@ health.check <- function(obs, data=USDAClean){
 # nrow(USDAClean[USDAClean$HighSodium & USDAClean$HighSugar & USDAClean$HighFat,])
 ```
 
-### 14. Add a new variable called HealthCheck to the data frame using the output of the function. (8 points)
-```{r}
-# INSERT YOUR ANSWER HERE
-```
-
-### 15. How many foods in the USDAclean data frame fail the HealthCheck? (8 points)
-```{r}
-# INSERT YOUR ANSWER HERE
-```
-
 ### 16. Save your final data frame as "USDAclean_ [your last name]" (4 points)
 ```{r}
-# INSERT YOUR ANSWER HERE
+write.csv(x=USDAClean, file="USDAclean_Clark.csv")
 ```
 
 
