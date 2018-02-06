@@ -61,13 +61,13 @@ anova(mtcars.lm, mtcars.lm.wt)
 7) Obtain  a  %95  confidence  interval  for  the  mean  miles  per  gallon  (mpg)  whose  horse  power  ( hp) is 100 and displacement (dp) is 300.  
 ```{r}
 
-predict(mtcars.lm, data.frame(disp=300,hp=100), confidence=0.95)
+predict(mtcars.lm, data.frame(disp=300,hp=100), confidence=0.95, interval="confidence")
 ```
 
 8) Obtain a %95 prediction interval for the mean miles per gallon (mpg) whose horse power (hp)  is 100 and displacement (dp) is 300.  
 
 
 ```{r}
-predict(mtcars.lm, data.frame(disp=300,hp=100), confidence=0.95)
+predict(mtcars.lm, data.frame(disp=300,hp=100), confidence=0.95, interval = "prediction")
 ```
 
