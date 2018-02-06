@@ -1,0 +1,73 @@
+---
+title: "CMTH642 Lab 04"
+author: "Geoffrey Clark"
+date: "February 6, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## CMTH 642 LAB 4
+1) Consider the data set "mtcars"  – Motor Trend Car Road Tests  - available in the R environment.  It  gives  a  comparison  between  different  car  models  in  terms  of  mileage  per  gallon  (mpg),  cylinder  displacement("disp"),  horse  power("hp"),  weight  of  the  car("wt")  and  some  more  parameters. The goal of the model is to establish the relationship between "mpg" as a response  variable with "disp","hp" and "wt" as predictor variables.  Read the data set “mtcars” in R. 
+```{r}
+# library(ISwR)
+str(mtcars)
+```
+
+
+2) C reate a subset of these variables f rom the mtcars data set for this purpose. 
+```{r}
+mtcars.subset <- mtcars[,c('mpg','disp','hp','wt')]
+```
+
+3) Prior to building a Regression Model, investigate how the variables are related to one another.  Construct scatter plots of all - pair wise combinations in the data frame. (Hint: Use “plot”) 
+```{r}
+plot(mtcars.subset)
+```
+
+
+4) Fit a multiple linear reg ression model with mileage per gallon (mpg) as the response variable  and cylinder displacement (disp) and horse power (hp) as the explanatory variables. (Hint: Use  “lm”) Afterwards, comment on the output and drive the fitted value. 
+```{r}
+mtcars.lm <- lm(mpg ~ disp + hp, data=mtcars.subset)
+summary(mtcars.lm)
+anova(mtcars.lm)
+
+# highly significant relationship between mpg & disp; tending towards significance (terminology?) between hp & mpg
+```
+
+
+5) The first test in multi ple regression is testing whether the explanatory variables collectively  influence the response variable, i.e.  (H0 = B1 = B2 = ... Bn = 0) 
+
+The null hypothesi s was that all of the βj’s are  equal to zero against the alternative that allows  them to take any valu es. If we reject this null hypothesis , then t his is the same as saying there  is enough evidence to conclude that at least one  of the variables has predictive  power in our  linear mo del. Access the results of each test. 
+
+```{r}
+# ANOVA again?
+```
+
+
+6) Sometimes  we  may  be  interested  in  sim ultaneously  testing  whether  a  certain  subset  of  the  coefficients are equal to 0 (e.g B3 = B4 = 0). We can do this by using a partial F - test.  Suppose  we include the variable weight (wt) in our model and interested in testing weather the weight  is  significan t  after  taking  displacement  (dp)  and  horse  power  (hp)  into  account.    Perform  a  partial F - test to comment on rejecting or failing to reject of the null hypothesis,  H0.
+
+```{r}
+mtcars.lm.wt <- lm(mpg ~ disp + hp + wt, data=mtcars.subset)
+anova(mtcars.lm, mtcars.lm.wt)
+
+# Reject H0: Significance < 0.01
+```
+
+
+7) Obtain  a  %95  confidence  interval  for  the  mean  miles  per  gallon  (mpg)  whose  horse  power  ( hp) is 100 and displacement (dp) is 300.  
+```{r}
+
+predict(mtcars.lm, data.frame(disp=300,hp=100), confidence=0.95)
+```
+
+8) Obtain a %95 prediction interval for the mean miles per gallon (mpg) whose horse power (hp)  is 100 and displacement (dp) is 300.  
+
+
+```{r}
+predict(mtcars.lm, data.frame(disp=300,hp=100), confidence=0.95)
+```
+
