@@ -7,8 +7,8 @@ output:
 
 ### 1. Read the csv files in the folder. (4 points)
 ```{r}
-USDA_Micro <- read.csv('USDA_Micronutrients.csv')
-USDA_Macro <- read.csv('USDA_Macronutrients.csv')
+USDA_Micro <- read.csv('USDA_Micronutrients2.csv', header=T, sep=",")
+USDA_Macro <- read.csv('USDA_Macronutrients2.csv', header=T, sep=",")
 ```
 
 ### 2. Merge the data frames using the variable "ID". Name the Merged Data Frame "USDA". (4 points)
@@ -19,15 +19,15 @@ USDA <- merge(USDA_Micro, USDA_Macro, by="ID")
 ### 3. Check the datatypes of the attributes. Delete the commas in the Sodium and Potasium records. Assign Sodium and Potasium as numeric data types. (6 points)
 ```{r}
 sapply(USDA, class)
-gsub(',','', USDA$Sodium)
-gsub(',','', USDA$Potassium)
+USDA$Sodium <- gsub(",","", USDA$Sodium)
+USDA$Potassium <- gsub(",","", USDA$Potassium)
 USDA$Sodium <- as.numeric(USDA$Sodium)
 USDA$Potassium <- as.numeric(USDA$Potassium)
 ```
 
 ### 4. Remove records (rows) with missing values in more than 4 attributes (columns). How many records remain in the data frame? (6 points)
 ```{r}
-USDA <- USDA[apply(USDA, 1 ,function(x) sum(is.na(x)) <= 4 ), ] #6918 Records remain
+USDA <- USDA[apply(USDA, 1 ,function(x) sum(is.na(x)) <= 4), ] #6887 Records remain
 ```
 
 ### 5. For records with missing values for Sugar, Vitamin E and Vitamin D, replace missing values with mean value for the respective variable. (6 points)
@@ -56,8 +56,8 @@ for(att in c('Sugar','VitaminE','VitaminD')){
 ### 6. With a single line of code, remove all remaining records with missing values. Name the new Data Frame "USDAclean". How many records remain in the data frame? (6 points)
 ```{r}
 USDAClean <- USDA[complete.cases(USDA),]
-
-# sum(is.na(USDA)) # 468
+nrow(USDAClean)
+# sum(is.na(USDA)) # 690
 # sum(is.na(USDAClean)) # 0
 ```
 
@@ -65,7 +65,7 @@ USDAClean <- USDA[complete.cases(USDA),]
 ### 7. Which food has the highest sodium level? (6 points)
 ```{r}
 USDAClean[USDAClean$Sodium == max(USDAClean$Sodium),]
-# Biscuit, Pln or Butmlk, Refri Dough, Higher fat
+# SALT, TABLE
 ```
 
 ### 8. Create a histogram of Vitamin C distribution in foods, with a limit of 0 to 100 on the x-axis and breaks of 100. (6 points)
@@ -98,7 +98,7 @@ for(att in c('Sodium', 'Calories','Protein','Sugar','TotalFat')){
 }
 
 # How many foods have both high sodium and high fat?
-nrow(USDAClean[USDAClean$HighSodium & USDAClean$HighTotalFat, ]) #1195
+nrow(USDAClean[USDAClean$HighSodium & USDAClean$HighTotalFat, ]) #644
 ```
 
 ### 12. Calculate the average amount of iron, sorted by high and low protein. (8 points)
@@ -167,7 +167,7 @@ USDAClean$HealthCheck <- apply(USDAClean,1,health.check)
 ### 15. How many foods in the USDAclean data frame fail the HealthCheck? (8 points)
 ```{r}
 # Total which fail test: Total - Pass
-(nrow(USDAClean) - sum(apply(USDAClean,1, health.check))) #427
+(nrow(USDAClean) - sum(apply(USDAClean,1, health.check))) #237
 
 # Same as:
 # nrow(USDAClean[USDAClean$HighSodium & USDAClean$HighSugar & USDAClean$HighFat,])
