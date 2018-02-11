@@ -1,8 +1,8 @@
 ---
 title: 'CMTH 642 Data Analytics: Advanced Methods Assignment 1'
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ### 1. Read the csv files in the folder. (4 points)
@@ -18,7 +18,12 @@ USDA <- merge(USDA_Micro, USDA_Macro, by="ID")
 
 ### 3. Check the datatypes of the attributes. Delete the commas in the Sodium and Potasium records. Assign Sodium and Potasium as numeric data types. (6 points)
 ```{r}
+# Type & Class
 sapply(USDA, class)
+sapply(USDA, typeof)
+# str(USDAClean)
+
+# Basic Cleaning & Type Coercion
 USDA$Sodium <- gsub(",","", USDA$Sodium)
 USDA$Potassium <- gsub(",","", USDA$Potassium)
 USDA$Sodium <- as.numeric(USDA$Sodium)
@@ -48,15 +53,13 @@ USDA <- USDA[apply(USDA, 1 ,function(x) sum(is.na(x)) <= 4), ] #6887 Records rem
 
 for(att in c('Sugar','VitaminE','VitaminD')){
   USDA[is.na(USDA[,att]),att] <- mean(USDA[,att], na.rm=T)
-  # print(USDA[is.na(USDA[,att]),])
-  # print(mean(USDA[,att], na.rm=T))
 }
 ```
 
 ### 6. With a single line of code, remove all remaining records with missing values. Name the new Data Frame "USDAclean". How many records remain in the data frame? (6 points)
 ```{r}
 USDAClean <- USDA[complete.cases(USDA),]
-nrow(USDAClean)
+nrow(USDAClean) #6310
 # sum(is.na(USDA)) # 690
 # sum(is.na(USDAClean)) # 0
 ```
@@ -65,7 +68,7 @@ nrow(USDAClean)
 ### 7. Which food has the highest sodium level? (6 points)
 ```{r}
 USDAClean[USDAClean$Sodium == max(USDAClean$Sodium),]
-# SALT, TABLE
+# SALT, TABLE (Table Salt)
 ```
 
 ### 8. Create a histogram of Vitamin C distribution in foods, with a limit of 0 to 100 on the x-axis and breaks of 100. (6 points)
@@ -86,12 +89,14 @@ plot(USDAClean$Calories, USDAClean$TotalFat)
 
 ### 11. Add a variable to the data frame that takes value 1 if the food has higher sodium than average, 0 otherwise.Call this variable HighSodium. Do the same for High Calories, High Protein, High Sugar, and High Fat. How many foods have both high sodium and high fat? (8 points)
 ```{r}
+# Long Way
 # USDAClean$HighSodium <- as.numeric(USDAClean[,'Sodium'] > mean(USDAClean$Sodium))
 # USDAClean$HighCalories <- as.numeric(USDAClean[,'Calories'] > mean(USDAClean$Calories))
 # USDAClean$HighProtein <- as.numeric(USDAClean[,'Protein'] > mean(USDAClean$Protein))
 # USDAClean$HighSugar <- as.numeric(USDAClean[,'Sugar'] > mean(USDAClean$Sugar))
 # USDAClean$HighFat <- as.numeric(USDAClean[,'TotalFat'] > mean(USDAClean$TotalFat))
 
+# Short Way
 for(att in c('Sodium', 'Calories','Protein','Sugar','TotalFat')){
   high.att <- paste('High',att,sep='')
   USDAClean[,high.att] <- as.numeric(USDAClean[,att] > mean(USDAClean[,att]))
@@ -116,47 +121,21 @@ plot(1:4, ty = 'n', ann = F, xaxt = 'n', yaxt = 'n')
 rasterImage(img,1,1,4,4)
 ```
 ```{r}
-
-# health.check <- function(sodium, sugar, fat, threshold=2, data=USDAClean){
-#   maxSugar <- mean(data$Sugar) + threshold*sd(data$Sugar)
-#   maxSodium <- mean(data$Sodium) + threshold*sd(data$Sodium)
-#   maxFat <- mean(data$TotalFat) + threshold*sd(data$TotalFat)
-#   
-#   print(maxSodium)
-#   print(maxSugar)
-#   print(maxFat)
-#   
-#   if(sodium > maxSodium && sugar > maxSugar && fat > maxFat){ return(TRUE) }
-#   #else if(sugar > maxSugar) { return false; }
-#   #else if(cond3) {...}
-#   else{ return(FALSE) }
-# 
-# }
-# As we already inserted the HighSodium columns you can subset the dataframe without abstracting the process into it's own function:
+# As we already inserted the High<Ingredient> columns you can subset the dataframe without abstracting 
+# the process into its own function:
 # bad.foods <- USDAClean[USDAClean$HighSodium & USDAClean$HighSugar & USDAClean$HighFat,]
 # 
 # However, as it seems you want an if/else ladder (in a function?):
-# This function will return a false (health check fails) for foods with higher than average sodium, sugar and fat. Otherwise returns a false (health check pass)
+# This function will return a false (health check fails) for foods with higher than average sodium, sugar and fat.
+# Otherwise returns true (health check pass)
 
 health.check <- function(obs, data=USDAClean){
-  # print(class(obs))
-  # print(obs)
-  # print(obs['Sodium'])
-  # print(mean(data$Sodium))
-  # # 
-  # print(data$Sodium > mean(data$Sodium))
-  # 
-  #if(data[id,'Sodium'] > mean(data$Sodium) && data[id, 'Sugar'] > mean(data$Sugar) && data[id, 'TotalFat'] > mean(data$TotalFat)) return(FALSE)
   meanSodium <- mean(data$Sodium)
   meanSugar <- mean(data$Sugar)
   meanFat <- mean(data$TotalFat)
-  # if(obs['Sodium'] > mean(data$Sodium) && obs['Sugar'] > mean(data$Sugar) && obs['TotalFat'] > mean(data$TotalFat)) return(FALSE)
-  # if(obs['Sodium'] > meanSodium & obs['Sugar'] > meanSugar & obs['TotalFat'] > meanFat) return(FALSE)
   if(as.numeric(obs['Sodium']) > meanSodium & as.numeric(obs['Sugar']) > meanSugar & as.numeric(obs['TotalFat']) > meanFat) return(FALSE)
   else return(TRUE)
 }
-
-
 ```
 
 ### 14. Add a new variable called HealthCheck to the data frame using the output of the function. (8 points)
@@ -170,7 +149,7 @@ USDAClean$HealthCheck <- apply(USDAClean,1,health.check)
 (nrow(USDAClean) - sum(apply(USDAClean,1, health.check))) #237
 
 # Same as:
-# nrow(USDAClean[USDAClean$HighSodium & USDAClean$HighSugar & USDAClean$HighFat,])
+# nrow(USDAClean[USDAClean$HighSodium & USDAClean$HighSugar & USDAClean$HighTotalFat,]) #237
 ```
 
 ### 16. Save your final data frame as "USDAclean_ [your last name]" (4 points)
