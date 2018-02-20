@@ -1,8 +1,8 @@
 ---
 title: 'CMTH 642 Data Analytics: Advanced Methods Assignment 1'
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ### 1. Read the csv files in the folder. (4 points)
@@ -79,12 +79,12 @@ hist(USDAClean$VitaminC, breaks=100, xlim=c(0,100), main="Vitamin C Distribution
 
 ### 9. Create a boxplot to illustrate the distribution of values for TotalFat, Protein and Carbohydrate. (6 points)
 ```{r}
-boxplot(USDAClean[,c('TotalFat','Protein','Carbohydrate')])
+boxplot(USDAClean[,c('TotalFat','Protein','Carbohydrate')], main="Distribution of TotalFat, Protein & Carbohydrate", xlab="Values", ylab="Distribution")
 ```
 
 ### 10. Create a scatterplot to illustrate the relationship between a food's TotalFat content and its calorie content. (6 points)
 ```{r}
-plot(USDAClean$Calories, USDAClean$TotalFat)
+plot(USDAClean$Calories, USDAClean$TotalFat, main="Relationship Between Foods' TotalFat & Calorie Content", xlab="Calories", ylab="Total Fat")
 ```
 
 ### 11. Add a variable to the data frame that takes value 1 if the food has higher sodium than average, 0 otherwise.Call this variable HighSodium. Do the same for High Calories, High Protein, High Sugar, and High Fat. How many foods have both high sodium and high fat? (8 points)
@@ -146,7 +146,7 @@ USDAClean$HealthCheck <- apply(USDAClean,1,health.check)
 ### 15. How many foods in the USDAclean data frame fail the HealthCheck? (8 points)
 ```{r}
 # Total which fail test: Total - Pass
-(nrow(USDAClean) - sum(apply(USDAClean,1, health.check))) #237
+(nrow(USDAClean) - sum(USDAClean$HealthCheck)) #237
 
 # Same as:
 # nrow(USDAClean[USDAClean$HighSodium & USDAClean$HighSugar & USDAClean$HighTotalFat,]) #237

@@ -1,0 +1,47 @@
+---
+title: "Textbook.ch14"
+author: "Geoffrey Clark"
+date: "2/18/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The below code I wrote so that I could quickly calculate expected values (E-hat) or Chi-square statistics as in chapter 14 of Mendenhall, Bevear & Bevear's Introduction to Probability & Statistics (2013).
+
+The example matrices are without decimal points; so for example e144 is the data from Example 14.4.
+
+
+
+```{r}
+# Playing aroudn with Example 14.4 pp583
+
+e144 <- matrix(c(15,21,45,13,26,31,34,5,33,17,49,20),nrow=4)
+e145 <- matrix(c(24,289,9,100,13,565), nrow=2)
+e147 <- matrix(c(76,124,53,147,69,141,48,152), nrow=2)
+
+expectedCells <- function(m){
+  # browser()
+#   result <- matrix(vector(mode="numeric", length=length(m)), nrow=nrow(m))
+#   for(ix in (1:nrow(m))){
+#     for(iy in (1:ncol(m)))
+#       result[ix,iy] <- (prod(sum(m[ix,]))*prod(sum(m[,iy])))/sum(m)
+#   }
+#   return(result)
+  
+  result <- matrix(vector(mode="numeric", length=length(m)), nrow=nrow(m))
+  for(i in (1:length(m))){
+    x <- ((i-1) %/% ncol(m)) + 1
+    y <- ((i-1) %% ncol(m)) + 1
+    result[x,y] <- (prod(sum(m[x,]))*prod(sum(m[,y])))/sum(m)
+  }
+  
+  return(result)
+}
+
+# sum(e144-expectedCells(e144)) #This is what I was using to calculate Chi-square statistic (wrong)
+# sum((e145 - expectedCells(e145))^2/expectedCells(e145)) # This actually calculates chi-square statistic (correct)
+```
+
