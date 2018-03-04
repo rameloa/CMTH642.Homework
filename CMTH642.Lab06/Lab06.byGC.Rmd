@@ -65,6 +65,16 @@ friedman.test(groups ~ labels|subjects, data=q3.df) #error
 q3.df.rm.na <- q3.df[as.numeric(q3.df$subjects) < 8,]
 friedman.test(groups ~ labels|subjects, data=q3.df.rm.na)
 
+# I somehow got the above to work by splitting everything up into separate vectors
+# (using the first 5 sets of values; does not work with NAs apparently)
+# note: this apparently isn't a proper use of this test, I was more interested in figuring out
+# why the function wouldn't run
+
+vals <- c(q3.c,q3.g,q3.f,q3.fg,q3.s)
+tmts <- rep(1:5, each=10)
+blks <- rep(1:10,5)
+friedman.test(vals ~ tmts | blks)
+
 # Solutions use kruskal-wallis...
 
 q3.df <- data.frame(C=q3.c, G=q3.g, F=q3.f, FG=q3.fg, S=q3.s, test=q3.test)
