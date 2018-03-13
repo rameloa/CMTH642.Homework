@@ -1,6 +1,7 @@
 ---
 title: "CMTH 642 - Assignment 2"
 output:
+  html_document: default
   pdf_document: default
   word_document: default
 ---
@@ -85,10 +86,6 @@ Create a Linear Regression Model (lm), using **Calories** as the dependent varia
 # Write your code here
 food.lm <- lm(Calories ~ Carbohydrate + Protein + TotalFat + Sodium, data=USDA_Selected_Featuers)
 
-# for(attr in c('Carbohydrate','Protein','TotalFat','Sodium')){
-  # USDA_Selected_Featuers[,attr] <- as.factor(USDA_Selected_Featuers[,attr])
-# }
-
 # Below is a shorthand (since we have already subsetted the dataframe): 
 # food.lm <- lm(Calories ~ ., data=USDA_Selected_Featuers)
 ```
@@ -106,7 +103,7 @@ B) Which independent variable has the strongest positive predictive power in the
 ```{r}
 # Write your code here and explain answers as a comment
 summary(food.lm)
-# I'm guessing that TotalFat has the highest predictive power because it has the largest co-efficient
+# TotalFat has the highest predictive power because it has the largest co-efficient
 ```
 ## Calories Prediction
 A new product is just produced with the following data:
@@ -131,7 +128,8 @@ B) If the *Sodium* amount increases 101 times from 430 to 43430 (10000% increase
 # Write your code here and explain answers as a comment
 
 predict(food.lm, data.frame(Protein=0.1,TotalFat=40,Carbohydrate=425,Sodium=43430,Cholesterol=75),interval="prediction")
-# Increasing the sodium from 430 to 43430 increases the predicted calories from 1943.65 to 1957.622
+((1957.622-1943.65)/1943.65)*100 # 0.719 %
+# Increasing the sodium from 430 to 43430 increases the predicted calories from 1943.65 to 1957.622 (less than 1%)
 # This is because Sodium has the lowest coefficient in the model (0.0003 vs 3.736 for the next lowest, Carbohydrate)
 ```
 
@@ -157,21 +155,16 @@ We wonder if illustrations improve how the students retell an article.
 ```{r}
 # Write your Answer as a comment here
 
-# Independent
-# H0: The distributions for populations 1 and 2 are identical
-# Ha: There is a difference in the distributions
-
 # Paired
-# H0: The two population relative frequency distributions are identical
-# Ha: The two population relative frequency distributinos differ in location
+# H0: The two population distributions are identical
+# Ha: The two population distributions are not identical
 ```
 
 ### Paired or Independent design?
 
 Based on your answer, which Wilcoxon test should you use? **(5 p)**
 ```{r}
-# Write your Answer as a comment here
-# Paired deisgn: Same article with or without pictures? Or else the pairing is the student
+# Wilcoxon Signed Rank Test
 ```
 
 ### Will you accept or reject your Null Hypothesis? ($\alpha = 0.05$)
@@ -182,7 +175,8 @@ Do illustrations improve how the students retell an article or not? **(5 p)**
 A1 <- c(0.4, 0.72, 0, 0.36, 0.55)
 A2 <- c(0.77, 0.49, 0.66, 0.28, 0.38)
 wilcox.test(A1,A2, paired=T)
-# Reject H0: Illustrations do not improve how students retell an article (p > 0.05)
+# Fail to Reject H0: No difference between population distributions 
+# (illustrations do not improve students' ability to retell article (p > 0.05))
 ```
 
 ## Packaging Problem
@@ -215,13 +209,13 @@ Please explain.
 
 ```{r}
 # Write your code here and explain answers as a comment
-wilcox.test(Ca,Cb,paired=T)
+wilcox.test(Ca,Cb,paired=F)
 
 # H0: The two population relative frequency distributions are identical
 # Ha: The two population relative frequency distributinos differ in location
 
 # You can reject H0 with 95% confidence but not 99%
-# p-value = 0.023 (0.95 <= (1 - a) <= 0.99)
+# p-value = 0.04988 (0.95 <= (1 - a) <= 0.99)
 ```
  
 # Correlation
@@ -246,6 +240,7 @@ B) What is the best description for "cyl" and "wt" variables? (Ratio, Ordinal, I
 # because there aren't really any ranks or order between the number of cylinders. 
 # Four cylinders is neither greater nor less than six, it is more used as a
 # description of what kind of engine the vehicle has (V6, Straight-6, Flathead V8 ETC)
+
 ```
 
 C) Based on the description of the "cyl" and "wt" variables, should you use "Pearson" or "Spearman" correlation? Find the correlation between these two variables. **(10 p)**
@@ -255,4 +250,6 @@ C) Based on the description of the "cyl" and "wt" variables, should you use "Pea
 # I would use Pearson's correlation because the model accounts for categorical variables
 # (using dummy values). Since ranking cylinders doesn't make sense I wouldn't use Spearman.
 cor(mtcars$cyl, mtcars$wt) #0.78 strong positive correlation
+
+# If, above, you decided that cylinders were interval and could be ranked (V8 > V6 > V4, etc), which doesn't make sense to me, you would pass the cor function an argument method="spearman"
 ```
