@@ -1,0 +1,133 @@
+---
+title: "CMTH 642 LAB 08"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+###Preface
+
+In this lab, you learn how to estimate logistic regression models using glm (generalized linear model) function. To complete this lab, you should fill *"TO BE COMPLETED"* sections in code area sections.
+
+###Question 1: Admission Prediction
+
+We are interested to see how variables, such as GRE (Graduate Record Exam scores), GPA (grade point average) and prestige of the undergraduate institution, effect admission into graduate school at UCLA. The data for this analysis is collected from (http://stats.idre.ucla.edu/).
+The admit variable, admit/not admitted, is a binary variable. data can be obtained from our website from within R.
+
+```{r}
+mydata <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+## view the first few rows of the data
+head(mydata)
+```
+
+This dataset has a binary response (outcome, dependent) variable called admit. There are three predictor variables: gre, gpa and rank. We will treat the variables gre and gpa as continuous. The variable rank takes on the values 1 through 4. Institutions with a rank of 1 have the highest prestige, while those with a rank of 4 have the lowest. We can get basic descriptives for the entire data set by using summary. To get the standard deviations, we use sapply to apply the sd function to each variable in the dataset.
+
+```{r}
+summary(mydata)
+```
+
+
+####Estimate Logistic Regression Model
+
+First, convert rank to a factor to indicate that rank should be treated as a categorical variable, afterwards use glm to estimate the model:
+
+```{r}
+# TO BE COMPLETED
+```
+
+####Output Analysis
+
+How do you analyze the outputs of this model?
+
+
+###Question 2: Survival Prediction
+
+a) Create an imaginary dataset of 20 individuals of different body sizes using rnorm function
+
+b) Sorts individuals in ascending order based on their body size
+
+c) Assign (0,0,0,0,0,1,0,1,0,0,1,1,0,1,1,1,0,1,1,1) to these sorted list as their classes of 'survival'
+
+```{r}
+#TO BE COMPLETED
+```
+
+####Plotting logistic regression and classes in R
+
+Now you should plot using the glm model based on each feature. Here we just have one feature which is 'Body Size'.
+
+a) Plot with body size on x-axis and survival (0 or 1) on y-axis
+
+b) Run a logistic regression model for prediction
+
+c) Draws a curve based on prediction from logistic regression model
+
+```{r}
+#TO BE COMPLETED
+```
+
+###Question 3: Menarche Age
+
+In the "MASS" library there is a data set called "menarche" in which there are three variables: "Age" (average age of age homogeneous groups of girls), "Total" (number of girls in each group), and "Menarche" (number of girls in the group who have reached menarche). 
+
+a) Write necessary codes after "TO BE COMPLETED" to create a model for Menarche age based on the provided information 
+
+
+```{r}
+library("MASS") 
+data(menarche)
+head(menarche)
+tail(menarche)
+str(menarche)
+summary(menarche)
+
+#TO BE COMPLETED
+#Write your code here!
+
+
+```
+
+###Question 4 Hypertension Problem
+
+Let's analyze the example concerning hypertension. Response is hypertensive y/n.
+Predictors are smoking (y/n), obesity (y/n), snoring (y/n). 
+How well can these 3 factors explain/predict the presence of hypertension? Which are important? 
+
+We enter the following data:
+```{r}
+no.yes <- c("No","Yes")
+smoking <- gl(2,1,8,no.yes)
+obesity <- gl(2,2,8,no.yes)
+snoring <- gl(2,4,8,no.yes)
+n.tot <- c(60,17,8,2,187,85,51,23)
+n.hyp <- c(5,2,1,0,35,13,15,8)
+data.frame(smoking,obesity,snoring,n.tot,n.hyp)
+```
+
+The "gl" function refers to "generate levels". The first three arguments to gl are, respectively, "the number of levels", "the repeat count of each level", and "the total length of the vector". A fourth
+argument can be used to specify the level names of the resulting factor.
+The result is apparent from the printout of the generated variables.
+
+The `cbind` function ('c' for 'column') is used to bind variables together,
+columnwise, to form a matrix. 
+```{r}
+hyp.tbl <- cbind(n.hyp,n.tot-n.hyp)
+hyp.tbl
+```
+We can specify the logistic regression model as
+```{r}
+glm(hyp.tbl~smoking+obesity+snoring,family=binomial("logit"))
+```
+Actually, "logit" is the default for `binomial` and the `family` argument
+is the second argument to `glm`, so it suffices to write
+
+#### Logistic Regresion Model
+
+Write the code to create logistic regression model for hypertension problem based on smoking, obesity, snoring.
+
+```{r}
+#TO BE COMPLETED
+```
+
+#### Output Analysis
+How are the variables smoking, obesity and snoring correlated? Is it appropriate to remove one of these variables?
