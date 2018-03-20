@@ -1,0 +1,35 @@
+---
+title: "CMTH 642 Lab 9"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+1. Apply PCA on the indepenent variables of IRIS Dataset. Hint: Use prcomp function from stats library Load the data and keep only the first 4 variables.
+```{r}
+
+idf <- iris[,-5]
+# idf <- iris[,1:4]
+# model <- princomp(idf)
+model <- prcomp(idf)
+```
+
+2. Plot the proportion of variancane explained by each component. How many components will you choose to capture maximum variability in the data set?
+```{r}
+plot(model)
+```
+
+3. Apply normalization (scaling and centering) to your data. Recalculate PCA with normalized data. What is the effect of normalizing (centering and scaling) on the PCA results? How many components are more explanatory now?
+```{r}
+model_2 <- prcomp(idf, center=T, scale. = T)
+summary(model)
+summary(model_2)
+plot(model_2)
+```
+
+4. Boxplot the original dataset and transformed one. What do you observe?
+Biplot the first two PCs. 
+
+5. Visualize first two components of your PCA. Hint: biplot
+
+6. Check the correlations of the original dataset and the correlations of the PCs.
