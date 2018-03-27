@@ -1,0 +1,117 @@
+---
+title: "CMTH642 Assignment 3"
+author: "Geoffrey Clark"
+date: "March 27, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Prep
+
+Preparation:  The  dataset is related to white Portuguese "Vinh o Verde" wine. For more info: https://archive.ics.uci.edu/ml/datasets/Wine+Quality
+
+Import to R the following  file: http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv
+
+
+```{r}
+# wine.df <- read.csv("http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv", header=T, sep=";")
+wine.df <- read.csv("winequality-white.csv", header=T, sep=";")
+
+# For Visualizing Correlation:
+# install.packages("corrplot")
+# library(corrplot)
+```
+
+QUESTIONS
+
+1. Check data characteristics. Is there missing data? 
+```{r}
+sum(is.na(wine.df)) #0
+str(wine.df)
+```
+
+2. What is the correlation between the attributes other than wine quality? 
+```{r}
+(wine.cor <- cor(wine.df[,-12]))
+corrplot(wine.cor, method="number") # I did this because I appreciate the visual
+
+# highest correlation:
+# density & residual.sugar: 0.84
+# density & alcohol: -0.78
+
+# I found a cool SO thread on how to do this programmatically:
+# https://stackoverflow.com/questions/7074246/show-correlations-as-an-ordered-list-not-as-a-large-matrix#7074856
+
+# as.data.frame(as.table(wine.cor))
+
+# install.packages("reshape")
+# library(reshape)
+
+wine.cor.list <- wine.cor
+wine.cor.list[wine.cor.list == 1] <- NA
+wine.cor.list <- na.omit(melt(wine.cor.list))
+wine.cor.list[order(-abs(wine.cor.list$value)),]
+```
+
+
+3. Graph the frequency distribution of wine quality .
+```{r}
+hist(wine.df$quality, freq=T, breaks=seq(2.5,9.5,1))
+```
+
+
+4. Reduce the levels of rating for quality to three levels as high, medium and low.
+```{r}
+# (max(wine.df$quality) - min(wine.df$quality))/3 # size of each level
+# wine.quality.factors <- cut(wine.df$quality, c(2,6,10))
+# sum(is.na(wine.quality.factors))
+# wine.df$quality <- cut(wine.df$quality, c(2,4,7,11))
+wine.df$quality <- cut(wine.df$quality, 3, labels=c("Low","Medium","High"))
+```
+
+
+5. Normalize the data set.
+```{r}
+levels(wine.df$quality) <- c(1, 2, 3) # kNN in Q7 won't work well with strings..
+```
+
+6. Divide the data to training and testing groups.
+```{r}
+wine.train_index <- sample(1:nrow(wine.df), 0.7*nrow(wine.df))
+wine.train <- wine.df[wine.train_index,]
+wine.test <- wine.df[-wine.train_index,]
+(nrow(wine.df) == (nrow(wine.train) + nrow(wine.test))) # Did we include all observations?
+
+
+```
+
+7. Use the KNN algorithm to p redi ct the quality of wine using its attributes.
+```{r}
+wine.knn <- list(k3=factor(),k5=factor(),k7=factor())
+wine.knn$k3 <- knn(train=wine.train, test=wine.test, cl=wine.train$quality, k=3)
+wine.knn$k5 <- knn(train=wine.train, test=wine.test, cl=wine.train$quality, k=5)
+wine.knn$k7 <- knn(train=wine.train, test=wine.test, cl=wine.train$quality, k=7)
+```
+
+
+8. Evaluate the model performance .
+```{r}
+# I prefer actual results along the top of the table: I find it easier to read
+# This seems pretty standard, and is likewise on Wikipedia: https://en.wikipedia.org/wiki/Confusion_matrix
+CrossTable(x=wine.knn$k3, y=wine.test$quality, prop.chisq = F)
+CrossTable(x=wine.knn$k5, y=wine.test$quality, prop.chisq = F)
+CrossTable(x=wine.knn$k7, y=wine.test$quality, prop.chisq = F)
+
+# Changing the value of K didn't make much difference but k=3 had best results
+# Otherwise maybe this wasn't a great classifier...
+# TP rates were (k=3): 53.1%, 79.6% and 15.9% for Low, medium & high respectively
+
+```
+
+
+
+Save your R codes in an RMD file.
+Send your  RMD and PDF  files to the course shell.
