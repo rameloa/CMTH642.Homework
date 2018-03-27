@@ -1,0 +1,53 @@
+---
+title: 'CMTH 642 LAB 10 '
+output: pdf_document
+---
+
+Preparation: 
+
+install.packages("class")
+
+install.packages("gmodels")
+
+library(class)
+
+library(gmodels)
+
+We will detect prostate cancer in this lab session. Download Prostate_Cancer.csv from the course shell. The data set contains patients who have been diagnosed with either Malignant (M) or Benign (B) cancer.
+
+Questions:
+
+1. Check data characteristics. Is there missing data? Prepare the data for analysis.
+```{r}
+pc <- read.csv("Prostate_Cancer.csv")
+str(pc)
+sum(is.na(pc))
+
+```
+
+2. Normalize the data set.
+```{r}
+pc$id <- NULL
+# pc.norm <- pc[]
+levels(pc$diagnosis_result) <- c(1,2) # B,M
+```
+
+3. Divide the data to training and testing groups.
+```{r}
+pc_train.index <- sample(1:nrow(pc), 0.7*nrow(pc))
+pc_train <- pc[pc_train.index,]
+pc_test <- pc[-pc_train.index,]
+```
+
+4. Use the KNN algorithm to predict the cancer.
+```{r}
+# pc_train_labels <- pc_train$diagnosis_result
+# pc_test_labels <- pc_test$diagnosis_result
+pc.knn <- knn(train=pc_train, test=pc_test, cl=pc_train$diagnosis_result, k=3)
+```
+
+5. Evaluate the model performance.
+```{r}
+CrossTable(y=pc_test$diagnosis_result, x=pc.knn, prop.chisq=F)
+```
+
