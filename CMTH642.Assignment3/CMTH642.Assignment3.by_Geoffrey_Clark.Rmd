@@ -31,6 +31,7 @@ QUESTIONS
 ```{r}
 sum(is.na(wine.df)) #0
 str(wine.df)
+sapply(wine.df, function(x) sum(is.na(x))) # No NAs
 ```
 
 2. What is the correlation between the attributes other than wine quality? 
@@ -76,20 +77,23 @@ wine.df$quality <- cut(wine.df$quality, 3, labels=c("Low","Medium","High"))
 5. Normalize the data set.
 ```{r}
 levels(wine.df$quality) <- c(1, 2, 3) # kNN in Q7 won't work well with strings..
+# scale() returns a matrix. Also requires numerical values (exclude class attribute (factor): column 12)
+wine.df.norm <- as.data.frame(scale(wine.df[,-12])) 
+wine.df.norm <- cbind(wine.df.norm, wine.df[,12]) # Re-add class attribute
+names(wine.df.norm)[12] <- names(wine.df)[12] # Re-name the class attribute
 ```
 
 6. Divide the data to training and testing groups.
 ```{r}
-wine.train_index <- sample(1:nrow(wine.df), 0.7*nrow(wine.df))
-wine.train <- wine.df[wine.train_index,]
-wine.test <- wine.df[-wine.train_index,]
+wine.train_index <- sample(1:nrow(wine.df.norm), 0.7*nrow(wine.df.norm))
+wine.train <- wine.df.norm[wine.train_index,]
+wine.test <- wine.df.norm[-wine.train_index,]
 (nrow(wine.df) == (nrow(wine.train) + nrow(wine.test))) # Did we include all observations?
-
-
 ```
 
-7. Use the KNN algorithm to p redi ct the quality of wine using its attributes.
+7. Use the KNN algorithm to predict the quality of wine using its attributes.
 ```{r}
+# library(class) # needed for knn()
 wine.knn <- list(k3=factor(),k5=factor(),k7=factor())
 wine.knn$k3 <- knn(train=wine.train, test=wine.test, cl=wine.train$quality, k=3)
 wine.knn$k5 <- knn(train=wine.train, test=wine.test, cl=wine.train$quality, k=5)
@@ -99,16 +103,23 @@ wine.knn$k7 <- knn(train=wine.train, test=wine.test, cl=wine.train$quality, k=7)
 
 8. Evaluate the model performance .
 ```{r}
+# library(gmodels) # Necessary for CrossTable()
+# low: 1, medium: 2, high:3
 # I prefer actual results along the top of the table: I find it easier to read
 # This seems pretty standard, and is likewise on Wikipedia: https://en.wikipedia.org/wiki/Confusion_matrix
 CrossTable(x=wine.knn$k3, y=wine.test$quality, prop.chisq = F)
 CrossTable(x=wine.knn$k5, y=wine.test$quality, prop.chisq = F)
 CrossTable(x=wine.knn$k7, y=wine.test$quality, prop.chisq = F)
 
-# Changing the value of K didn't make much difference but k=3 had best results
-# Otherwise maybe this wasn't a great classifier...
-# TP rates were (k=3): 53.1%, 79.6% and 15.9% for Low, medium & high respectively
+# Different values of k produce very similar results with the best being a marginal k=5
+# This classifier performs very well. However there is a noticable improvement after normalizing 
+# the data with scale(). 
+# 
+# WITHOUT NORMALIZE:
+# TP rates (k=3): 53.1%, 79.6% and 15.9% for Low, medium & high respectively
 
+# WITH NORMALIZE:
+# TP rates (k=3): 92.1%, 89.5%, 88.5%  
 ```
 
 
