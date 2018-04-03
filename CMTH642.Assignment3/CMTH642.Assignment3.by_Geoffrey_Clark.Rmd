@@ -19,10 +19,6 @@ Import to R the following  file: http://archive.ics.uci.edu/ml/machine-learning-
 ```{r}
 # wine.df <- read.csv("http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv", header=T, sep=";")
 wine.df <- read.csv("winequality-white.csv", header=T, sep=";")
-
-# For Visualizing Correlation:
-# install.packages("corrplot")
-# library(corrplot)
 ```
 
 QUESTIONS
@@ -32,10 +28,15 @@ QUESTIONS
 sum(is.na(wine.df)) #0
 str(wine.df)
 sapply(wine.df, function(x) sum(is.na(x))) # No NAs
+sapply(wine.df, function(x) sum(is.null(x)))
 ```
 
 2. What is the correlation between the attributes other than wine quality? 
 ```{r}
+# For Visualizing Correlation:
+# install.packages("corrplot")
+library(corrplot)
+
 (wine.cor <- cor(wine.df[,-12]))
 corrplot(wine.cor, method="number") # I did this because I appreciate the visual
 
@@ -49,7 +50,7 @@ corrplot(wine.cor, method="number") # I did this because I appreciate the visual
 # as.data.frame(as.table(wine.cor))
 
 # install.packages("reshape")
-# library(reshape)
+library(reshape)
 
 wine.cor.list <- wine.cor
 wine.cor.list[wine.cor.list == 1] <- NA
@@ -76,7 +77,7 @@ wine.df$quality <- cut(wine.df$quality, 3, labels=c("Low","Medium","High"))
 
 5. Normalize the data set.
 ```{r}
-levels(wine.df$quality) <- c(1, 2, 3) # kNN in Q7 won't work well with strings..
+# levels(wine.df$quality) <- c(1, 2, 3) # kNN in Q7 won't work well with strings..
 # scale() returns a matrix. Also requires numerical values (exclude class attribute (factor): column 12)
 wine.df.norm <- as.data.frame(scale(wine.df[,-12])) 
 wine.df.norm <- cbind(wine.df.norm, wine.df[,12]) # Re-add class attribute
@@ -93,17 +94,21 @@ wine.test <- wine.df.norm[-wine.train_index,]
 
 7. Use the KNN algorithm to predict the quality of wine using its attributes.
 ```{r}
-# library(class) # needed for knn()
+library(class) # needed for knn()
+
+# wine.train_labels <- wine.train$quality
+# wine.test_labels <- wine.test$quality
+
 wine.knn <- list(k3=factor(),k5=factor(),k7=factor())
-wine.knn$k3 <- knn(train=wine.train, test=wine.test, cl=wine.train$quality, k=3)
-wine.knn$k5 <- knn(train=wine.train, test=wine.test, cl=wine.train$quality, k=5)
-wine.knn$k7 <- knn(train=wine.train, test=wine.test, cl=wine.train$quality, k=7)
+wine.knn$k3 <- knn(train=wine.train[,-12], test=wine.test[,-12], cl=wine.train$quality, k=3)
+wine.knn$k5 <- knn(train=wine.train[,-12], test=wine.test[,-12], cl=wine.train$quality, k=5)
+wine.knn$k7 <- knn(train=wine.train[-12], test=wine.test[,-12], cl=wine.train$quality, k=7)
 ```
 
 
 8. Evaluate the model performance .
 ```{r}
-# library(gmodels) # Necessary for CrossTable()
+library(gmodels) # Necessary for CrossTable()
 # low: 1, medium: 2, high:3
 # I prefer actual results along the top of the table: I find it easier to read
 # This seems pretty standard, and is likewise on Wikipedia: https://en.wikipedia.org/wiki/Confusion_matrix
