@@ -1,0 +1,153 @@
+---
+title: "CMTH642 Lab 11"
+author: "Geoffrey Clark"
+date: "April 3, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Please first of all install the needed packages with the install.packages() function. And then,  call the following libraries.
+```{r}
+library (RCurl)  # getURL 
+library (MASS)  # stepwise regression
+library (leaps)  # all subsets regression
+```
+
+### Dataset
+In our examples, we will use the  a  computer dataset which contains information about  price, speed, hd, ram, screen, cd, multi, premium, ads,  and  trend.  The  purpose of this lab is finding the best com
+
+We first
+download the dataset as follows:
+
+```{r}
+u <- getURL ( "http://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Computers.csv" ) 
+c_prices <- read.csv ( text = u)
+```
+
+### Q1)  Split the dataset to 70% of training and 30% of test sets.  We want to make sure  that the training set and the test set do not have any common data points.
+
+```{r}
+c_train_index <- sample(1:nrow(c_prices), 0.7*nrow(c_prices) )
+c.train <- c_prices[c_train_index,]
+c.test <- c_prices[-c_train_index,]
+```
+
+
+### Q2) Multiple Linear Regression  Algorithm
+a) Create lm model based on train set. Use multiple linear regression model to  predict the 'price' variable based on 'ram', 'screen', 'speed', 'hd' and 'ads' as  in dependent variables.
+```{r}
+c.lm <- lm(price~ram+screen+speed+hd+ads, data=c.train)
+```
+
+b) Use predict() function on the test set
+```{r}
+c.predictions <- predict(c.lm, newdata=c.test)
+```
+
+c) Calculate error (prediction price  - test price) in predictions and show the  histogram of error
+```{r}
+error <- c.predictions - c.test
+hist(error$price, breaks=100)
+```
+
+
+d) Calculate mean square error (mse) and find the percentage of cases with less  than 25% error.
+```{r}
+mse <- sum((error$price)^2)/nrow(error) 
+# I suppose I was supposed to square root the above:
+# (from module notes)
+# rmse <- sqrt(sum((prediction[,"fit"] - test$price)^2)/nrow(test))
+
+c.rel_error <- 1 - (c.predictions - error$price)/c.predictions
+(length(c.rel_error[c.rel_error<0.25])/length(c.rel_error))
+```
+
+
+### Q3) Use  simple linear regression model by using 'ram' as an independent variable.  Compare the results with the multiple linear regression .
+a) Create lm model based on train set.
+```{r}
+c.slm <- lm(price~ram, data=c.train)
+summary(c.slm)
+summary(c.lm)
+```
+
+
+
+b) Use predict() function on the test set
+```{r}
+c.spredict <- predict(c.slm, newdata=c.test)
+```
+
+c) Calculate error (prediction price  - test price)  in predictions and show the  histogram of error
+```{r}
+c.sp.error <- c.spredict - c.test$price
+hist(c.sp.error, breaks=100)
+```
+
+d) Calculate  mean square error (mse)  and find the percentage of cases with  less than 25% error.
+```{r}
+c.slm.mse <- sum(c.sp.error^2)/length(c.sp.error)
+c.slm.rel_changes <- 1 - ((c.spredict - abs(c.sp.error)) / c.spredict)
+(length(c.slm.rel_changes[c.slm.rel_changes<0.25])/length(c.slm.rel_changes))
+```
+
+e) Compare the results with the multiple linear regression.
+```{r}
+# MSE is greater for simple than multiple
+# The histogram for multiple regression also seems more normal in 
+# the sense that it has a smoother curve.
+# Also the multiple regression has a higher % of cases with less than 25% error
+```
+
+Q4) Forward  and Backward  selection algorithm
+a) Forward : Star t with 'null', which means none of the indepenent variables are  selected.  You will come up with a selection of independent variables between  'null' and 'full'. 'full' means all the independent variables are included. You will end up using all the variables. Set 'trace=TRUE' to see all the steps.
+```{r}
+full <- lm(price~ram+hd+speed+screen+ads+trend, data=c_prices)
+null <- lm(price~1, data=c_prices)
+stepF <- stepAIC(null, scope=list(lower=null, upper=full), direction="forward", trace=TRUE)
+```
+
+b) Backward : We can also use 'backward' elimination, which will start with 'full'.
+
+Q5) Variable selection using automatic methods The R package leaps has a function regsubsets that can be used for best subsets, forward  selection and backwards elimination depending on which approach is considered most  appropriate for the application under consideration.
+a) Use regsubsets() to see the best combination of the 6 attributes
+b) What are th e best 4 attributes to predict computer price based on this analysis?
+```{r}
+subsets<-regsubsets(price~ram+hd+speed+screen+ads+trend,data=c_prices, nbest=1)
+sub.sum <- summary(subsets)
+as.data.frame(sub.sum$outmat)
+```
+
+Q6 ) Price Prediction using  k Nearest Neighbor Regression
+a) Suppose we have the following new  record , and we want to predict its price  based on kNN regression method and all the previous computer price records  available. 
+
+c(7000, 0 ,32,90,8,15,'no','no','yes',200,2)
+
+For now, its price is set as 0, so, the algorithm should predict the price. Use  knn.reg ()  for prediction of the price. (use k=7 and  algorithm="kd_tree" )
+```{r}
+# I Could not get the below code to work
+# grew disinterested and gave up. It's close. I've seen 
+# that the example in the solutions works. They bound the test
+# to the bottom of the training dataset. I'm not sure how much this 
+# matters but there's a SO answer that does the same.
+# Seems 
+
+# install.packages("FNN")
+# library(FNN)
+# knn.reg.y <- vector(length=ncol(c_prices), mode="numeric")
+knn.reg.y <- vector()
+# knn.reg.input <- apply(c_prices, 2, as.numeric)
+
+knn.reg.input <- c_prices
+knn.reg.input$cd <- as.numeric(knn.reg.input$cd)
+knn.reg.input$multi <- as.numeric(knn.reg.input$multi)
+knn.reg.input$premium <- as.numeric(knn.reg.input$premium)
+
+# knn.reg.test = as.numeric(c(7000, 0 ,32,90,8,15,'no','no','yes',200,2))
+knn.reg.test = as.numeric(c(7000, 0 ,32,90,8,15,0,0,1,200,2))
+knn.predict <- knn.reg(train=knn.reg.input[,-2], test=knn.reg.test[-2], y=knn.reg.y, k=7, algorithm = c("kd_tree"))
+```
+
