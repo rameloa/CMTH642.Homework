@@ -140,7 +140,24 @@ CrossTable(x=wine.knn$k7, y=wine.test$quality, prop.chisq = F)
 ```
 
 
+## Extra 
+### Visualization
 ```{r}
+# I tried to plot the KNN output of this assignment visually and ran into some trouble
+# I still believe this to be a great exercise but perhaps not ideal for this particular assignment.
+#
+# Some resources:
+# https://cran.r-project.org/web/packages/ElemStatLearn/ElemStatLearn.pdf # pg 8: mixture.example examples
+# https://stats.stackexchange.com/questions/21572/how-to-plot-decision-boundary-of-a-k-nearest-neighbor-classifier-from-elements-o/21602#21602
+# https://stackoverflow.com/questions/31234621/variation-on-how-to-plot-decision-boundary-of-a-k-nearest-neighbor-classifier-f
+# 
+# I adapted my code as much as possible from the examples and discussion on Stack Overflow but in the end
+# had to settle for a relatively straightforward cluster plot based on kNN algorithm.
+# I think this could be improved with dimensionality reduction: There are 12 dimenstions in this 
+# data set so reducing them to two or three principal components would perhaps make for a better
+# visual and also contribute in general to the analysis. 
+# I chose to plot pH vs. free.sulfur.dioxide because these are the least correlated factors in the dataset.  
+
 require(dplyr)
 classif <- wine.knn$k3
 prob <- attr(classif, "prob")
@@ -157,17 +174,19 @@ wine.gf.df <- bind_rows(mutate(wine.test[,-12],
                                cls="High",
                                prob_cls=ifelse(classif==cls, 1, 0)))
 
+# wine.gf.df.unq <- wine.gf.df[!duplicated(wine.gf.df[, c('pH', 'free.sulfur.dioxide')]), ]
+
 require(ggplot2)
 ggplot(wine.gf.df) +
-  geom_point(aes(x=density, y=residual.sugar, col=cls),
+  geom_point(aes(x=pH, y=free.sulfur.dioxide, col=cls),
              data=mutate(wine.test[,-12], cls=classif), 
              size=1.2) +
-  geom_contour(aes(x=density, y=residual.sugar, z=prob_cls, group=cls, color=cols),
-               bins=2,
-               data=wine.gf.df) +
+  # geom_contour(aes(x=pH, y=free.sulfur.dioxide, z=prob_cls, group=cls, color=cols),
+  #              bins=2,
+  #              data=wine.gf.df.unq) +
   geom_point(aes(x=x, y=y, col=cls),
              size=3,
-             data=data.frame(x=wine.train$density, y=wine.train$residual.sugar, cls=wine.train$quality))
+             data=data.frame(x=wine.train$pH, y=wine.train$free.sulfur.dioxide, cls=wine.train$quality))
 ```
 
 Save your R codes in an RMD file.
