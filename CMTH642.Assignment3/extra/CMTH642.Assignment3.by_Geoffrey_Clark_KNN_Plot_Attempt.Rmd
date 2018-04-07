@@ -2,7 +2,9 @@
 title: "CMTH642 Assignment 3"
 author: "Geoffrey Clark"
 date: "March 27, 2018"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -142,22 +144,18 @@ CrossTable(x=wine.knn$k7, y=wine.test$quality, prop.chisq = F)
 
 ## Extra 
 ### Visualization
-```{r}
-# I tried to plot the KNN output of this assignment visually and ran into some trouble
-# I still believe this to be a great exercise but perhaps not ideal for this particular assignment.
-#
-# Some resources:
-# https://cran.r-project.org/web/packages/ElemStatLearn/ElemStatLearn.pdf # pg 8: mixture.example examples
-# https://stats.stackexchange.com/questions/21572/how-to-plot-decision-boundary-of-a-k-nearest-neighbor-classifier-from-elements-o/21602#21602
-# https://stackoverflow.com/questions/31234621/variation-on-how-to-plot-decision-boundary-of-a-k-nearest-neighbor-classifier-f
-# 
-# I adapted my code as much as possible from the examples and discussion on Stack Overflow but in the end
-# had to settle for a relatively straightforward cluster plot based on kNN algorithm.
-# I think this could be improved with dimensionality reduction: There are 12 dimenstions in this 
-# data set so reducing them to two or three principal components would perhaps make for a better
-# visual and also contribute in general to the analysis. 
-# I chose to plot pH vs. free.sulfur.dioxide because these are the least correlated factors in the dataset.  
+I tried to plot the KNN output of this assignment visually and ran into some trouble
+I still believe this to be a great exercise but perhaps not ideal for this particular assignment.
 
+### Some resources:
+- https://cran.r-project.org/web/packages/ElemStatLearn/ElemStatLearn.pdf # pg 8: mixture.example examples
+- https://stats.stackexchange.com/questions/21572/how-to-plot-decision-boundary-of-a-k-nearest-neighbor-classifier-from-elements-o/21602#21602
+- https://stackoverflow.com/questions/31234621/variation-on-how-to-plot-decision-boundary-of-a-k-nearest-neighbor-classifier-f
+ 
+I adapted my code as much as possible from the examples and discussion on Stack Overflow but in the end had to settle for a relatively straightforward cluster plot based on kNN algorithm.
+I think this could be improved with dimensionality reduction: There are 12 dimenstions in this data set so reducing them to two or three principal components would perhaps make for a better visual and also contribute in general to the analysis. 
+I chose to plot pH vs. free.sulfur.dioxide because these are the least correlated factors in the dataset. 
+```{r}
 require(dplyr)
 classif <- wine.knn$k3
 prob <- attr(classif, "prob")
@@ -187,6 +185,55 @@ ggplot(wine.gf.df) +
   geom_point(aes(x=x, y=y, col=cls),
              size=3,
              data=data.frame(x=wine.train$pH, y=wine.train$free.sulfur.dioxide, cls=wine.train$quality))
+```
+
+
+## PCA 
+I decided to spend some more time on this dataset and applied PCA.
+My goal was the same as above; to organize the data in such a way to be able to create an effective visual. I was unsuccesful in that regard but did notice that the model performs better, with regards to the TP Rate, than without doing PCA. 
+
+```{r}
+wine.pca <- prcomp(wine.df[,-12], scale. = T, center = T)
+screeplot(wine.pca, type="lines")
+
+
+wine.pca.knn <- knn(train=wine.pca$x[wine.train_index,], test=wine.pca$x[-wine.train_index,], cl=wine.df[wine.train_index,'quality'], k=3, prob=T)
+
+CrossTable(x=wine.pca.knn, y=wine.df[-wine.train_index,'quality'], prop.chisq = F)
+
+prob <- attr(wine.pca.knn, "prob")
+test <- as.data.frame(wine.pca$x)
+
+wine.pca.gf.df <- bind_rows(mutate(test[-wine.train_index,],
+                               prob=prob,
+                               cls="Low",
+                               prob_cls=ifelse(wine.pca.knn==cls, 1, 0)),
+                        mutate(test[-wine.train_index,],
+                               prob=prob,
+                               cls="Medium",
+                               prob_cls=ifelse(wine.pca.knn==cls, 1, 0)),
+                        mutate(test[-wine.train_index,],
+                               prob=prob,
+                               cls="High",
+                               prob_cls=ifelse(wine.pca.knn==cls, 1, 0)))
+
+
+wine.pca.gf.df$cols <- vector(length=nrow(wine.pca.gf.df))
+wine.pca.gf.df$cols[wine.pca.gf.df$cls == 'Low'] <- 'c'
+wine.pca.gf.df$cols[wine.pca.gf.df$cls == 'Medium'] <- 's'
+wine.pca.gf.df$cols[wine.pca.gf.df$cls == 'High'] <- 'v'
+
+ggplot(wine.gf.df) +
+  geom_point(aes(x=PC1, y=PC2, col=cls),
+             data=mutate(test[-wine.train_index,], cls=wine.pca.knn), 
+             size=1.2) +
+  # geom_contour(aes(x=PC1, y=PC2, z=prob_cls, group=cls, color=cols),
+  #              bins=2,
+  #              data=wine.pca.gf.df) +
+  geom_point(aes(x=x, y=y, col=cls),
+             size=3,
+             data=data.frame(x=wine.pca$x[,1], y=wine.pca$x[,2], cls=wine.df$quality))
+
 ```
 
 Save your R codes in an RMD file.
