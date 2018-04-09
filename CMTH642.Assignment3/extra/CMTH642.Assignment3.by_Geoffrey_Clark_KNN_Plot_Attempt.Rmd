@@ -24,9 +24,9 @@ Import to R the following  file: http://archive.ics.uci.edu/ml/machine-learning-
 wine.df <- read.csv("winequality-white.csv", header=T, sep=";")
 ```
 
-QUESTIONS
+## QUESTIONS
 
-1. Check data characteristics. Is there missing data? 
+### 1. Check data characteristics. Is there missing data? 
 ```{r}
 sum(is.na(wine.df)) #0
 str(wine.df)
@@ -34,7 +34,7 @@ sapply(wine.df, function(x) sum(is.na(x))) # 0 NAs
 sapply(wine.df, function(x) sum(is.null(x))) # 0 NULLs 
 ```
 
-2. What is the correlation between the attributes other than wine quality? 
+### 2. What is the correlation between the attributes other than wine quality? 
 ```{r}
 # For Visualizing Correlation:
 # install.packages("corrplot")
@@ -62,36 +62,42 @@ wine.cor.list[order(-abs(wine.cor.list$value)),]
 ```
 
 
-3. Graph the frequency distribution of wine quality .
+### 3. Graph the frequency distribution of wine quality .
 ```{r}
-hist(wine.df$quality, freq=T, breaks=seq(2.5,9.5,1))
+hist(wine.df$quality, freq=T, breaks=seq(2.5,9.5,1), main="Frequency Distirbution of Wine Quality", xlab="Wine Quality")
 ```
 
 
-4. Reduce the levels of rating for quality to three levels as high, medium and low.
+### 4. Reduce the levels of rating for quality to three levels as high, medium and low.
 ```{r}
 wine.df$quality <- cut(wine.df$quality, 3, labels=c("Low","Medium","High"))
-plot(wine.df$quality) # unequal distribution of class variables (potential class imbalance problem)
+table(wine.df$quality)
+plot(wine.df$quality, main="Distribution of Wine Quality Levels", xlab="Wine Quality Level", ylab="Frequency") # unequal distribution of class variables (potential class imbalance problem)
 ```
 
 
-5. Normalize the data set.
+### 5. Normalize the data set.
 ```{r}
-# scale() returns a matrix. Also requires numerical values (exclude class attribute (factor): column 12)
-wine.df.norm <- as.data.frame(scale(wine.df[,-12])) 
+# scale() returns a matrix. Also requires numerical values
+# (exclude class attribute (factor): column 12)
+wine.df.norm <- as.data.frame(scale(wine.df[,-12], center=T, scale=T)) 
 wine.df.norm <- cbind(wine.df.norm, wine.df[,12]) # Re-add class attribute
 names(wine.df.norm)[12] <- names(wine.df)[12] # Re-name the class attribute
 ```
 
-6. Divide the data to training and testing groups.
+### 6. Divide the data to training and testing groups.
 ```{r}
+# I wanted replicable results for discussion. Remove below call to set.seed() to 
+# re-introduce pseudo random numbers in division of test & training set.  
+set.seed(42) 
+
 wine.train_index <- sample(1:nrow(wine.df.norm), 0.7*nrow(wine.df.norm))
 wine.train <- wine.df.norm[wine.train_index,]
 wine.test <- wine.df.norm[-wine.train_index,]
 (nrow(wine.df) == (nrow(wine.train) + nrow(wine.test))) # Did we include all observations?
 ```
 
-7. Use the KNN algorithm to predict the quality of wine using its attributes.
+### 7. Use the KNN algorithm to predict the quality of wine using its attributes.
 ```{r}
 library(class) # needed for knn()
 
@@ -99,18 +105,18 @@ library(class) # needed for knn()
 # wine.train_labels <- wine.train$quality
 # wine.test_labels <- wine.test$quality
 #
-# note the subsetting & removing the attribute quality (wine.test[,-12]): this
-# was done because knn() doesn't accept numerical values and seems to react
-# poorly to having the class attribute included in either train or test sets.
+# Note that subsetting & removing the attribute quality (wine.test[,-12]):
+# done to separate class attribute from training & test sets.
+# Explicitly defined as cl parameter. 
 
 wine.knn <- list(k3=factor(),k5=factor(),k7=factor())
 wine.knn$k3 <- knn(train=wine.train[,-12], test=wine.test[,-12], cl=wine.train$quality, k=3, prob=T)
 wine.knn$k5 <- knn(train=wine.train[,-12], test=wine.test[,-12], cl=wine.train$quality, k=5)
-wine.knn$k7 <- knn(train=wine.train[-12], test=wine.test[,-12], cl=wine.train$quality, k=7)
+wine.knn$k15 <- knn(train=wine.train[-12], test=wine.test[,-12], cl=wine.train$quality, k=15)
 ```
 
 
-8. Evaluate the model performance .
+### 8. Evaluate the model performance .
 ```{r}
 library(gmodels) # Necessary for CrossTable()
 
@@ -118,26 +124,33 @@ library(gmodels) # Necessary for CrossTable()
 # This seems pretty standard, and is likewise on Wikipedia: https://en.wikipedia.org/wiki/Confusion_matrix
 CrossTable(x=wine.knn$k3, y=wine.test$quality, prop.chisq = F)
 CrossTable(x=wine.knn$k5, y=wine.test$quality, prop.chisq = F)
-CrossTable(x=wine.knn$k7, y=wine.test$quality, prop.chisq = F)
+CrossTable(x=wine.knn$k15, y=wine.test$quality, prop.chisq = F)
 
 # Different values of k produce very similar results with the best being a toss up between k=3 & k=5
 # I think that overall this model performed acceptably. It would be interesting to compare to other 
 # models (Naive Bayes, Decesion Tree, etc) and see how it compares in terms of accuracy. 
 #  
-# I think another important concept that wasn't included in this assignment is the concept of "research question"
-# and "metrics of success". For example, below I listed the True Positive rates for the three levels: low,
-# medium and high. However, perhaps True Positives aren't the most important metrics for your research question.
+# I think another important concept that wasn't included in this assignment is the
+# concept of "research question" and "metrics of success". 
+# For example, below I listed the True Positive rates for the three levels: low, medium and high.
+# However, perhaps True Positives aren't the most important metrics for your research question.
 # Maybe False Positives are a bigger issue, or False Negatives. This is context specific but extremely relevant
-# with these types of models. For example, look at the classification of High Quality wines: The highest TP rate
-# is approximately 26%. That might not be considered very high depending on your research question.
+# with these types of models. For example, look at the classification of High Quality wines: 
+# The TP rates are 37%, 23% and 0% with k set to 3, and 15 respectively. 
+# That might not be considered very high depending on your research question.
 # 
-# 
-# 
-# TP rates (k=3): 59.8%, 74.9%, 26.3% for Low, medium & high respectively
+# Also note the low success TP rate for a high k: 0%. This would seem like a result of the "majority vote"
+# combined with a class imbalance problem. As there are so few Wines in the "high" category it is unlikely
+# that with a higher K, who collects votes from more "Nearest Neighbors" there being enough votes in
+# favour of the wine quality being "high". This is definitely an issue to be aware of when using
+# these models.
 #
-# Note above values are approximate and will change with each run of code unless pseudo-random number generator
-# is held constant with set.seed(). I chose not to do this as I was interested to see how different iterations
-# would affect the results.
+# TP rates (k=3): 64.9%, 78.7%, 37.0% for Low, Medium & High respectively
+#
+# I also did a Prime Component Analysis (PCA) and ran the kNN model to compare with the above results.
+# It produced a very marginal improvement in TP rates for k=3: 65.2%, 78.8%, and 40.0% for Low, Medium
+# & High, respectively. 
+
 
 ```
 
@@ -152,9 +165,7 @@ I still believe this to be a great exercise but perhaps not ideal for this parti
 - https://stats.stackexchange.com/questions/21572/how-to-plot-decision-boundary-of-a-k-nearest-neighbor-classifier-from-elements-o/21602#21602
 - https://stackoverflow.com/questions/31234621/variation-on-how-to-plot-decision-boundary-of-a-k-nearest-neighbor-classifier-f
  
-I adapted my code as much as possible from the examples and discussion on Stack Overflow but in the end had to settle for a relatively straightforward cluster plot based on kNN algorithm.
-I think this could be improved with dimensionality reduction: There are 12 dimenstions in this data set so reducing them to two or three principal components would perhaps make for a better visual and also contribute in general to the analysis. 
-I chose to plot pH vs. free.sulfur.dioxide because these are the least correlated factors in the dataset. 
+I adapted my code as much as possible from the examples and discussion on Stack Overflow but in the end had to settle for a relatively straightforward cluster plot based on kNN algorithm results. The results of this attempt made me wonder if performing Dimensionality Reduction would help: it didn't. My results are below. In the end I chose to plot pH vs. free.sulfur.dioxide because these are the least correlated factors in the dataset. 
 ```{r}
 require(dplyr)
 classif <- wine.knn$k3
