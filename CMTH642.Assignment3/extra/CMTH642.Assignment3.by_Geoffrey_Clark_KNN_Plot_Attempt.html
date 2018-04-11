@@ -11,7 +11,7 @@
 
 <meta name="author" content="Geoffrey Clark" />
 
-<meta name="date" content="2018-03-27" />
+<meta name="date" content="2018-04-11" />
 
 <title>CMTH642 Assignment 3</title>
 
@@ -119,7 +119,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">CMTH642 Assignment 3</h1>
 <h4 class="author"><em>Geoffrey Clark</em></h4>
-<h4 class="date"><em>March 27, 2018</em></h4>
+<h4 class="date"><em>April 11, 2018</em></h4>
 
 </div>
 
@@ -535,16 +535,16 @@ CrossTable(x=wine.knn$k3, y=wine.test$quality, prop.chisq = F)</code></pre>
 # concept of &quot;research question&quot; and &quot;metrics of success&quot;. 
 # For example, below I listed the True Positive rates for the three levels: low, medium and high.
 # However, perhaps True Positives aren't the most important metrics for your research question.
-# Maybe False Positives are a bigger issue, or False Negatives. This is context specific but extremely relevant
-# with these types of models. For example, look at the classification of High Quality wines: 
+# Maybe False Positives are a bigger issue, or False Negatives. This is context specific but extremely 
+# relevant with these types of models. For example, look at the classification of High Quality wines: 
 # The TP rates are 37%, 23% and 0% with k set to 3, and 15 respectively. 
 # That might not be considered very high depending on your research question.
 # 
-# Also note the low success TP rate for a high k: 0%. This would seem like a result of the &quot;majority vote&quot;
-# combined with a class imbalance problem. As there are so few Wines in the &quot;high&quot; category it is unlikely
-# that with a higher K, who collects votes from more &quot;Nearest Neighbors&quot; there being enough votes in
-# favour of the wine quality being &quot;high&quot;. This is definitely an issue to be aware of when using
-# these models.
+# Also note the low success TP rate for a high k: 0%. This would seem like a result of the 
+# &quot;majority vote&quot; combined with a class imbalance problem. As there are so few Wines in 
+# the &quot;high&quot; category it is unlikely that with a higher K, who collects votes from more
+# &quot;Nearest Neighbors&quot; there being enough votes in favour of the wine quality being &quot;high&quot;. 
+# This is definitely an issue to be aware of when using these models.
 #
 # TP rates (k=3): 64.9%, 78.7%, 37.0% for Low, Medium &amp; High respectively
 #

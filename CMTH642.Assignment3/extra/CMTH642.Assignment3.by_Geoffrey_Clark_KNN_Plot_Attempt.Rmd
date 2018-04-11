@@ -1,10 +1,10 @@
 ---
 title: "CMTH642 Assignment 3"
 author: "Geoffrey Clark"
-date: "March 27, 2018"
+date: "April 11, 2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -134,16 +134,16 @@ CrossTable(x=wine.knn$k15, y=wine.test$quality, prop.chisq = F)
 # concept of "research question" and "metrics of success". 
 # For example, below I listed the True Positive rates for the three levels: low, medium and high.
 # However, perhaps True Positives aren't the most important metrics for your research question.
-# Maybe False Positives are a bigger issue, or False Negatives. This is context specific but extremely relevant
-# with these types of models. For example, look at the classification of High Quality wines: 
+# Maybe False Positives are a bigger issue, or False Negatives. This is context specific but extremely 
+# relevant with these types of models. For example, look at the classification of High Quality wines: 
 # The TP rates are 37%, 23% and 0% with k set to 3, and 15 respectively. 
 # That might not be considered very high depending on your research question.
 # 
-# Also note the low success TP rate for a high k: 0%. This would seem like a result of the "majority vote"
-# combined with a class imbalance problem. As there are so few Wines in the "high" category it is unlikely
-# that with a higher K, who collects votes from more "Nearest Neighbors" there being enough votes in
-# favour of the wine quality being "high". This is definitely an issue to be aware of when using
-# these models.
+# Also note the low success TP rate for a high k: 0%. This would seem like a result of the 
+# "majority vote" combined with a class imbalance problem. As there are so few Wines in 
+# the "high" category it is unlikely that with a higher K, who collects votes from more
+# "Nearest Neighbors" there being enough votes in favour of the wine quality being "high". 
+# This is definitely an issue to be aware of when using these models.
 #
 # TP rates (k=3): 64.9%, 78.7%, 37.0% for Low, Medium & High respectively
 #
